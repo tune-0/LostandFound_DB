@@ -14,8 +14,8 @@ SETUP INSTRUCTIONS!
 
 3. ADD LIBRARIES
    - File → Project Structure → Libraries
-   - Add mysql-connector-j-x.x.x.jar
-   - Add jcalendar-1.4.jar
+   - Add mysql-connector-j-x.x.x.jar - Download inside the .idea / libraries
+   - Add jcalendar-1.4.jar - Download inside the .idea / libraries
 
 4. UPDATE DATABASE CONNECTION (if needed)
    - Open DatabaseConnection.java
