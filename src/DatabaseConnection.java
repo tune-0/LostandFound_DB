@@ -16,9 +16,6 @@ public class DatabaseConnection {
             // Load MySQL JDBC Driver
             Class.forName("com.mysql.cj.jdbc.Driver");
 
-            // First, try to create the database if it doesn't exist
-            createDatabaseIfNotExists();
-
             // Establish connection
             connection = DriverManager.getConnection(URL, USER, PASSWORD);
             System.out.println("Database connected successfully!");
@@ -32,28 +29,6 @@ public class DatabaseConnection {
         }
 
         return connection;
-    }
-
-    // Method to create database if it doesn't exist
-    private static void createDatabaseIfNotExists() {
-        try {
-            // Connect to MySQL without specifying database
-            Connection tempConn = DriverManager.getConnection(
-                    "jdbc:mysql://localhost:3306/", USER, PASSWORD);
-
-            java.sql.Statement stmt = tempConn.createStatement();
-
-            // Create database
-            stmt.executeUpdate("CREATE DATABASE IF NOT EXISTS LostandFound_DB");
-            System.out.println("Database checked/created successfully!");
-
-            stmt.close();
-            tempConn.close();
-
-        } catch (SQLException e) {
-            System.out.println("Error creating database!");
-            e.printStackTrace();
-        }
     }
 
     // Method to close connection
