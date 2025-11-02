@@ -27,6 +27,7 @@ public class AddItemDialog extends JDialog {
         titlePanel.setBackground(new Color(43, 141, 200));
         JLabel lblTitle = new JLabel("Add New Item");
         lblTitle.setFont(new Font("Arial", Font.BOLD, 18));
+        lblTitle.setForeground(Color.WHITE);
         titlePanel.add(lblTitle);
         add(titlePanel, BorderLayout.NORTH);
 

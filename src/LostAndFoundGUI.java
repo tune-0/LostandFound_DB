@@ -19,7 +19,7 @@ public class LostAndFoundGUI extends JFrame {
     private JTextField txtSearch;
 
     // Buttons
-    private JButton btnAdd, btnUpdate, btnDelete, btnRefresh, btnSearch;
+    private JButton btnAdd, btnUpdate, btnDelete, btnArchive, btnViewArchive, btnSearch;
     private JButton btnShowFound, btnShowLost, btnShowAll;
 
     private int selectedItemId = -1;
@@ -37,13 +37,25 @@ public class LostAndFoundGUI extends JFrame {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout(10, 10));
 
-        // Top Panel - Title
-        JPanel topPanel = new JPanel();
+        // Top Panel - Title and Archive Button
+        JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setBackground(new Color(52, 152, 219));
+
         JLabel lblTitle = new JLabel("Lost and Found Management System");
         lblTitle.setFont(new Font("Arial", Font.BOLD, 24));
         lblTitle.setForeground(Color.WHITE);
-        topPanel.add(lblTitle);
+        lblTitle.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 10));
+        topPanel.add(lblTitle, BorderLayout.WEST);
+
+        // View Archive Button on top right
+        btnViewArchive = new JButton("View Archive (" + itemDAO.getTotalArchivedCount() + ")");
+        btnViewArchive.setBackground(new Color(149, 165, 166));
+        btnViewArchive.setForeground(Color.BLACK);
+        btnViewArchive.setFont(new Font("Arial", Font.BOLD, 13));
+        btnViewArchive.setFocusPainted(false);
+        btnViewArchive.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        topPanel.add(btnViewArchive, BorderLayout.EAST);
+
         add(topPanel, BorderLayout.NORTH);
 
         // Center Panel - Table
@@ -196,6 +208,13 @@ public class LostAndFoundGUI extends JFrame {
         btnUpdate.setEnabled(false);
         btnUpdate.setFocusPainted(false);
 
+        btnArchive = new JButton("Archive Item");
+        btnArchive.setBackground(new Color(149, 165, 166));
+        btnArchive.setForeground(Color.BLACK);
+        btnArchive.setFont(new Font("Arial", Font.BOLD, 14));
+        btnArchive.setEnabled(false);
+        btnArchive.setFocusPainted(false);
+
         btnDelete = new JButton("Delete Item");
         btnDelete.setBackground(new Color(245, 183, 177));
         btnDelete.setForeground(Color.BLACK);
@@ -205,6 +224,7 @@ public class LostAndFoundGUI extends JFrame {
 
         buttonPanel.add(btnAdd);
         buttonPanel.add(btnUpdate);
+        buttonPanel.add(btnArchive);
         buttonPanel.add(btnDelete);
 
         bottomPanel.add(buttonPanel, BorderLayout.SOUTH);
@@ -231,25 +251,41 @@ public class LostAndFoundGUI extends JFrame {
             dialog.setVisible(true);
             if (dialog.isItemAdded()) {
                 loadAllItems();
+                updateArchiveCount();
             }
         });
 
         // Update button
         btnUpdate.addActionListener(e -> updateItem());
 
+        // Archive button
+        btnArchive.addActionListener(e -> archiveItem());
+
         // Delete button
         btnDelete.addActionListener(e -> deleteItem());
 
-        // Search button
-        btnSearch.addActionListener(e -> searchItems());
+        // View Archive button
+        btnViewArchive.addActionListener(e -> {
+            ArchiveViewer viewer = new ArchiveViewer();
+            viewer.setVisible(true);
+            viewer.addWindowListener(new java.awt.event.WindowAdapter() {
+                @Override
+                public void windowClosed(java.awt.event.WindowEvent windowEvent) {
+                    loadAllItems();
+                    updateArchiveCount();
+                }
+            });
+        });
 
-        // Filter buttons
+
+        btnSearch.addActionListener(e -> searchItems());
+        txtSearch.addActionListener(e -> searchItems());
+
         btnShowAll.addActionListener(e -> loadAllItems());
         btnShowFound.addActionListener(e -> filterByStatus("Found"));
         btnShowLost.addActionListener(e -> filterByStatus("Lost"));
-
-        txtSearch.addActionListener(e -> searchItems());
     }
+
 
     private void loadAllItems() {
         tableModel.setRowCount(0);
@@ -280,6 +316,7 @@ public class LostAndFoundGUI extends JFrame {
         cmbStatus.setSelectedItem(status);
 
         btnUpdate.setEnabled(true);
+        btnArchive.setEnabled(true);
         btnDelete.setEnabled(true);
     }
 
@@ -301,6 +338,38 @@ public class LostAndFoundGUI extends JFrame {
             } else {
                 JOptionPane.showMessageDialog(this, "Failed to update item!",
                         "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    private void archiveItem() {
+        if (selectedItemId != -1) {
+            String[] options = {"Claimed", "Returned to Owner", "Resolved", "Other"};
+            String reason = (String) JOptionPane.showInputDialog(
+                    this,
+                    "Select reason for archiving:",
+                    "Archive Item",
+                    JOptionPane.QUESTION_MESSAGE,
+                    null,
+                    options,
+                    options[0]
+            );
+
+            if (reason != null) {
+                if (itemDAO.archiveItem(selectedItemId, reason)) {
+                    JOptionPane.showMessageDialog(this,
+                            "Item archived successfully!",
+                            "Success",
+                            JOptionPane.INFORMATION_MESSAGE);
+                    loadAllItems();
+                    clearForm();
+                    updateArchiveCount();
+                } else {
+                    JOptionPane.showMessageDialog(this,
+                            "Failed to archive item!",
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE);
+                }
             }
         }
     }
@@ -385,9 +454,14 @@ public class LostAndFoundGUI extends JFrame {
         selectedItemId = -1;
 
         btnUpdate.setEnabled(false);
+        btnArchive.setEnabled(false);
         btnDelete.setEnabled(false);
 
         itemTable.clearSelection();
+    }
+
+    private void updateArchiveCount() {
+        btnViewArchive.setText("View Archive (" + itemDAO.getTotalArchivedCount() + ")");
     }
 
     private boolean validateForm() {

@@ -206,7 +206,6 @@ public class ItemDAO {
     private void resetAutoIncrement(Connection conn) {
         try {
             Statement stmt = conn.createStatement();
-            // Get the maximum ID currently in the table
             ResultSet rs = stmt.executeQuery("SELECT MAX(item_id) as max_id FROM items");
             int maxId = 0;
             if (rs.next()) {
@@ -236,6 +235,178 @@ public class ItemDAO {
 
         } catch (SQLException e) {
             System.out.println("Error getting item count: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return count;
+    }
+
+    // ========== ARCHIVE SYSTEM METHODS ==========
+
+    // Archive an item (move to archive table and delete from active)
+    public boolean archiveItem(int itemId, String reason) {
+        Item item = getItemById(itemId);
+        if (item == null) {
+            System.out.println("Item not found!");
+            return false;
+        }
+
+        String insertSql = "INSERT INTO archived_items (item_id, item_name, item_type, date_found, status, archived_reason) VALUES (?, ?, ?, ?, ?, ?)";
+        String deleteSql = "DELETE FROM items WHERE item_id = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            conn.setAutoCommit(false); // Start transaction
+
+            try (PreparedStatement insertStmt = conn.prepareStatement(insertSql);
+                 PreparedStatement deleteStmt = conn.prepareStatement(deleteSql)) {
+
+                // Insert into archive
+                insertStmt.setInt(1, item.getItemId());
+                insertStmt.setString(2, item.getItemName());
+                insertStmt.setString(3, item.getItemType());
+                insertStmt.setDate(4, item.getDateFound());
+                insertStmt.setString(5, item.getStatus());
+                insertStmt.setString(6, reason);
+                insertStmt.executeUpdate();
+
+                // Delete from active items
+                deleteStmt.setInt(1, itemId);
+                deleteStmt.executeUpdate();
+
+                conn.commit(); // Commit transaction
+                System.out.println("Item archived successfully!");
+                return true;
+
+            } catch (SQLException e) {
+                conn.rollback(); // Rollback on error
+                System.out.println("Error archiving item: " + e.getMessage());
+                e.printStackTrace();
+                return false;
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Database connection error: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // Get all archived items
+    public List<ArchivedItem> getAllArchivedItems() {
+        List<ArchivedItem> items = new ArrayList<>();
+        String sql = "SELECT * FROM archived_items ORDER BY archived_date DESC";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            while (rs.next()) {
+                ArchivedItem item = new ArchivedItem();
+                item.setArchiveId(rs.getInt("archive_id"));
+                item.setItemId(rs.getInt("item_id"));
+                item.setItemName(rs.getString("item_name"));
+                item.setItemType(rs.getString("item_type"));
+                item.setDateFound(rs.getDate("date_found"));
+                item.setStatus(rs.getString("status"));
+                item.setArchivedDate(rs.getTimestamp("archived_date"));
+                item.setArchivedReason(rs.getString("archived_reason"));
+
+                items.add(item);
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error retrieving archived items: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return items;
+    }
+
+    // Restore archived item back to active items
+    public boolean restoreArchivedItem(int archiveId) {
+        String selectSql = "SELECT * FROM archived_items WHERE archive_id = ?";
+        String insertSql = "INSERT INTO items (item_name, item_type, date_found, status) VALUES (?, ?, ?, ?)";
+        String deleteSql = "DELETE FROM archived_items WHERE archive_id = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            conn.setAutoCommit(false);
+
+            try (PreparedStatement selectStmt = conn.prepareStatement(selectSql);
+                 PreparedStatement insertStmt = conn.prepareStatement(insertSql);
+                 PreparedStatement deleteStmt = conn.prepareStatement(deleteSql)) {
+
+                // Get archived item
+                selectStmt.setInt(1, archiveId);
+                ResultSet rs = selectStmt.executeQuery();
+
+                if (rs.next()) {
+                    // Insert back to active items
+                    insertStmt.setString(1, rs.getString("item_name"));
+                    insertStmt.setString(2, rs.getString("item_type"));
+                    insertStmt.setDate(3, rs.getDate("date_found"));
+                    insertStmt.setString(4, rs.getString("status"));
+                    insertStmt.executeUpdate();
+
+                    // Delete from archive
+                    deleteStmt.setInt(1, archiveId);
+                    deleteStmt.executeUpdate();
+
+                    conn.commit();
+                    System.out.println("Item restored successfully!");
+                    return true;
+                } else {
+                    conn.rollback();
+                    System.out.println("Archived item not found!");
+                    return false;
+                }
+
+            } catch (SQLException e) {
+                conn.rollback();
+                System.out.println("Error restoring item: " + e.getMessage());
+                e.printStackTrace();
+                return false;
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Database connection error: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // Delete archived item permanently
+    public boolean deleteArchivedItem(int archiveId) {
+        String sql = "DELETE FROM archived_items WHERE archive_id = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, archiveId);
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected > 0;
+
+        } catch (SQLException e) {
+            System.out.println("Error deleting archived item: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // Get total count of archived items
+    public int getTotalArchivedCount() {
+        String sql = "SELECT COUNT(*) as total FROM archived_items";
+        int count = 0;
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            if (rs.next()) {
+                count = rs.getInt("total");
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error getting archived count: " + e.getMessage());
             e.printStackTrace();
         }
 
