@@ -39,7 +39,7 @@ public class LostAndFoundGUI extends JFrame {
 
         // Top Panel - Title and Archive Button
         JPanel topPanel = new JPanel(new BorderLayout());
-        topPanel.setBackground(new Color(52, 152, 219));
+        topPanel.setBackground(new Color(38, 128, 186));
 
         JLabel lblTitle = new JLabel("Lost and Found Management System");
         lblTitle.setFont(new Font("Arial", Font.BOLD, 24));

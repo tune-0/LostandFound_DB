@@ -3,20 +3,18 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class DatabaseConnection {
-    // Database credentials for XAMPP MySQL
+
     private static final String URL = "jdbc:mysql://localhost:3306/LostandFound_DB";
     private static final String USER = "root";
-    private static final String PASSWORD = ""; // Default XAMPP password is empty
+    private static final String PASSWORD = "";
 
     private static Connection connection = null;
 
-    // Method to get database connection
+    // get database connection
     public static Connection getConnection() {
         try {
-            // Load MySQL JDBC Driver
             Class.forName("com.mysql.cj.jdbc.Driver");
 
-            // Establish connection
             connection = DriverManager.getConnection(URL, USER, PASSWORD);
             System.out.println("Database connected successfully!");
 
@@ -31,7 +29,7 @@ public class DatabaseConnection {
         return connection;
     }
 
-    // Method to close connection
+    // close connection
     public static void closeConnection() {
         if (connection != null) {
             try {

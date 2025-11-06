@@ -4,7 +4,6 @@ import java.util.List;
 
 public class ItemDAO {
 
-    // Create - Add new item
     public boolean addItem(Item item) {
         String sql = "INSERT INTO items (item_name, item_type, date_found, status) VALUES (?, ?, ?, ?)";
 
@@ -156,7 +155,7 @@ public class ItemDAO {
         return items;
     }
 
-    // Update - Update existing item
+    // Update
     public boolean updateItem(Item item) {
         String sql = "UPDATE items SET item_name = ?, item_type = ?, date_found = ?, status = ? WHERE item_id = ?";
 
@@ -179,7 +178,7 @@ public class ItemDAO {
         }
     }
 
-    // Delete - Delete item by ID
+    // Delete
     public boolean deleteItem(int itemId) {
         String sql = "DELETE FROM items WHERE item_id = ?";
 
@@ -241,9 +240,8 @@ public class ItemDAO {
         return count;
     }
 
-    // ========== ARCHIVE SYSTEM METHODS ==========
 
-    // Archive an item (move to archive table and delete from active)
+    // Archive
     public boolean archiveItem(int itemId, String reason) {
         Item item = getItemById(itemId);
         if (item == null) {
@@ -255,12 +253,11 @@ public class ItemDAO {
         String deleteSql = "DELETE FROM items WHERE item_id = ?";
 
         try (Connection conn = DatabaseConnection.getConnection()) {
-            conn.setAutoCommit(false); // Start transaction
+            conn.setAutoCommit(false);
 
             try (PreparedStatement insertStmt = conn.prepareStatement(insertSql);
                  PreparedStatement deleteStmt = conn.prepareStatement(deleteSql)) {
 
-                // Insert into archive
                 insertStmt.setInt(1, item.getItemId());
                 insertStmt.setString(2, item.getItemName());
                 insertStmt.setString(3, item.getItemType());
@@ -269,16 +266,15 @@ public class ItemDAO {
                 insertStmt.setString(6, reason);
                 insertStmt.executeUpdate();
 
-                // Delete from active items
                 deleteStmt.setInt(1, itemId);
                 deleteStmt.executeUpdate();
 
-                conn.commit(); // Commit transaction
+                conn.commit();
                 System.out.println("Item archived successfully!");
                 return true;
 
             } catch (SQLException e) {
-                conn.rollback(); // Rollback on error
+                conn.rollback();
                 System.out.println("Error archiving item: " + e.getMessage());
                 e.printStackTrace();
                 return false;
@@ -340,14 +336,14 @@ public class ItemDAO {
                 ResultSet rs = selectStmt.executeQuery();
 
                 if (rs.next()) {
-                    // Insert back to active items
+
                     insertStmt.setString(1, rs.getString("item_name"));
                     insertStmt.setString(2, rs.getString("item_type"));
                     insertStmt.setDate(3, rs.getDate("date_found"));
                     insertStmt.setString(4, rs.getString("status"));
                     insertStmt.executeUpdate();
 
-                    // Delete from archive
+
                     deleteStmt.setInt(1, archiveId);
                     deleteStmt.executeUpdate();
 

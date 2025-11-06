@@ -111,7 +111,6 @@ public class ArchiveViewer extends JFrame {
 
         add(bottomPanel, BorderLayout.SOUTH);
 
-        // Add Action Listeners
         addActionListeners();
     }
 
