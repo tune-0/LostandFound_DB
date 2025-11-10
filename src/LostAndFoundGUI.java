@@ -10,6 +10,7 @@ public class LostAndFoundGUI extends JFrame {
     private final ItemDAO itemDAO;
     private JTable itemTable;
     private DefaultTableModel tableModel;
+    private User currentUser; // Store logged-in user
 
     // Form components
     private JTextField txtItemName;
@@ -19,12 +20,14 @@ public class LostAndFoundGUI extends JFrame {
     private JTextField txtSearch;
 
     // Buttons
-    private JButton btnAdd, btnUpdate, btnDelete, btnArchive, btnViewArchive, btnSearch;
+    private JButton btnAdd, btnUpdate, btnDelete, btnArchive, btnViewArchive, btnSearch, btnLogout;
     private JButton btnShowFound, btnShowLost, btnShowAll;
 
     private int selectedItemId = -1;
 
-    public LostAndFoundGUI() {
+    // Constructor that accepts logged-in user
+    public LostAndFoundGUI(User user) {
+        this.currentUser = user;
         itemDAO = new ItemDAO();
         initComponents();
         loadAllItems();
@@ -277,15 +280,15 @@ public class LostAndFoundGUI extends JFrame {
             });
         });
 
-
+        // Search button
         btnSearch.addActionListener(e -> searchItems());
         txtSearch.addActionListener(e -> searchItems());
 
+        // Filter buttons
         btnShowAll.addActionListener(e -> loadAllItems());
         btnShowFound.addActionListener(e -> filterByStatus("Found"));
         btnShowLost.addActionListener(e -> filterByStatus("Lost"));
     }
-
 
     private void loadAllItems() {
         tableModel.setRowCount(0);
@@ -461,7 +464,7 @@ public class LostAndFoundGUI extends JFrame {
     }
 
     private void updateArchiveCount() {
-        btnViewArchive.setText("View Archive (" + itemDAO.getTotalArchivedCount() + ")");
+        btnViewArchive.setText("📦 View Archive (" + itemDAO.getTotalArchivedCount() + ")");
     }
 
     private boolean validateForm() {
@@ -487,9 +490,10 @@ public class LostAndFoundGUI extends JFrame {
             e.printStackTrace();
         }
 
+        // Start with login screen instead of main GUI
         SwingUtilities.invokeLater(() -> {
-            LostAndFoundGUI gui = new LostAndFoundGUI();
-            gui.setVisible(true);
+            LoginScreen loginScreen = new LoginScreen();
+            loginScreen.setVisible(true);
         });
     }
 }
