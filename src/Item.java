@@ -6,6 +6,7 @@ public class Item {
     private String itemName;
     private String itemType;
     private Date dateFound;
+    private String locationFound;  // NEW FIELD
     private String status;
     private Timestamp createdAt;
     private Timestamp updatedAt;
@@ -13,22 +14,24 @@ public class Item {
     public Item() {
     }
 
-    public Item(String itemName, String itemType, Date dateFound, String status) {
+    public Item(String itemName, String itemType, Date dateFound, String locationFound, String status) {
         this.itemName = itemName;
         this.itemType = itemType;
         this.dateFound = dateFound;
+        this.locationFound = locationFound;  // NEW
         this.status = status;
     }
 
-    public Item(int itemId, String itemName, String itemType, Date dateFound, String status) {
+    public Item(int itemId, String itemName, String itemType, Date dateFound, String locationFound, String status) {
         this.itemId = itemId;
         this.itemName = itemName;
         this.itemType = itemType;
         this.dateFound = dateFound;
+        this.locationFound = locationFound;  // NEW
         this.status = status;
     }
 
-    // Getters and Setters
+    // Existing Getters and Setters...
     public int getItemId() {
         return itemId;
     }
@@ -59,6 +62,15 @@ public class Item {
 
     public void setDateFound(Date dateFound) {
         this.dateFound = dateFound;
+    }
+
+    // NEW GETTER AND SETTER
+    public String getLocationFound() {
+        return locationFound;
+    }
+
+    public void setLocationFound(String locationFound) {
+        this.locationFound = locationFound;
     }
 
     public String getStatus() {
@@ -92,6 +104,7 @@ public class Item {
                 ", itemName='" + itemName + '\'' +
                 ", itemType='" + itemType + '\'' +
                 ", dateFound=" + dateFound +
+                ", locationFound='" + locationFound + '\'' +
                 ", status='" + status + '\'' +
                 '}';
     }

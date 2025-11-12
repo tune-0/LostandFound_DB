@@ -18,7 +18,7 @@ public class ArchiveViewer extends JFrame {
 
     private void initComponents() {
         setTitle("Archive - Lost and Found Items");
-        setSize(900, 600);
+        setSize(1000, 600);  // Increased width to accommodate new column
         setLocationRelativeTo(null);
         setLayout(new BorderLayout(10, 10));
 
@@ -43,8 +43,8 @@ public class ArchiveViewer extends JFrame {
         infoPanel.add(lblInfo);
         centerPanel.add(infoPanel, BorderLayout.NORTH);
 
-        // Table
-        String[] columns = {"Archive ID", "Item ID", "Item Name", "Item Type", "Date Found", "Status", "Archived Date", "Reason"};
+        // Table - UPDATED with Location Found column
+        String[] columns = {"Archive ID", "Item ID", "Item Name", "Item Type", "Date Found", "Location Found", "Status", "Archived Date", "Reason"};
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -58,15 +58,16 @@ public class ArchiveViewer extends JFrame {
         archiveTable.getTableHeader().setBackground(new Color(52, 73, 94));
         archiveTable.getTableHeader().setForeground(Color.BLACK);
 
-        // Column widths
-        archiveTable.getColumnModel().getColumn(0).setPreferredWidth(80);
-        archiveTable.getColumnModel().getColumn(1).setPreferredWidth(60);
-        archiveTable.getColumnModel().getColumn(2).setPreferredWidth(150);
-        archiveTable.getColumnModel().getColumn(3).setPreferredWidth(120);
-        archiveTable.getColumnModel().getColumn(4).setPreferredWidth(100);
-        archiveTable.getColumnModel().getColumn(5).setPreferredWidth(80);
-        archiveTable.getColumnModel().getColumn(6).setPreferredWidth(150);
-        archiveTable.getColumnModel().getColumn(7).setPreferredWidth(120);
+        // Column widths - UPDATED
+        archiveTable.getColumnModel().getColumn(0).setPreferredWidth(80);   // Archive ID
+        archiveTable.getColumnModel().getColumn(1).setPreferredWidth(60);   // Item ID
+        archiveTable.getColumnModel().getColumn(2).setPreferredWidth(150);  // Item Name
+        archiveTable.getColumnModel().getColumn(3).setPreferredWidth(120);  // Item Type
+        archiveTable.getColumnModel().getColumn(4).setPreferredWidth(100);  // Date Found
+        archiveTable.getColumnModel().getColumn(5).setPreferredWidth(130);  // Location Found - NEW
+        archiveTable.getColumnModel().getColumn(6).setPreferredWidth(80);   // Status
+        archiveTable.getColumnModel().getColumn(7).setPreferredWidth(150);  // Archived Date
+        archiveTable.getColumnModel().getColumn(8).setPreferredWidth(120);  // Reason
 
         JScrollPane scrollPane = new JScrollPane(archiveTable);
         centerPanel.add(scrollPane, BorderLayout.CENTER);
@@ -83,14 +84,12 @@ public class ArchiveViewer extends JFrame {
         btnRestore.setFocusPainted(false);
         btnRestore.setEnabled(false);
 
-
         btnDelete = new JButton("Delete Permanently");
         btnDelete.setBackground(new Color(231, 76, 60));
         btnDelete.setForeground(Color.BLACK);
         btnDelete.setFont(new Font("Arial", Font.BOLD, 13));
         btnDelete.setFocusPainted(false);
         btnDelete.setEnabled(false);
-
 
         btnRefresh = new JButton("Refresh");
         btnRefresh.setBackground(new Color(52, 152, 219));
@@ -162,6 +161,7 @@ public class ArchiveViewer extends JFrame {
                     item.getItemName(),
                     item.getItemType(),
                     item.getDateFound(),
+                    item.getLocationFound(),  // NEW - Added location
                     item.getStatus(),
                     item.getArchivedDate(),
                     item.getArchivedReason()

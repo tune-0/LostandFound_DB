@@ -25,7 +25,7 @@ public class LoginScreen extends JFrame {
         // Main container
         JPanel mainPanel = new JPanel(new GridLayout(1, 2, 0, 0));
 
-        // ========== LEFT SIDE - Image/Illustration Panel ==========
+        // LEFT SIDE - Image/Illustration Panel
         JPanel leftPanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
@@ -33,11 +33,11 @@ public class LoginScreen extends JFrame {
                 Graphics2D g2d = (Graphics2D) g;
                 g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 
-                // Modern gradient background
+                // background
                 int w = getWidth();
                 int h = getHeight();
-                Color color1 = new Color(106, 17, 203); // Purple
-                Color color2 = new Color(37, 117, 252); // Blue
+                Color color1 = new Color(106, 17, 203);
+                Color color2 = new Color(37, 117, 252);
                 GradientPaint gp = new GradientPaint(0, 0, color1, w, h, color2);
                 g2d.setPaint(gp);
                 g2d.fillRect(0, 0, w, h);

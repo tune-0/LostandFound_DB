@@ -5,7 +5,7 @@ import java.util.List;
 public class ItemDAO {
 
     public boolean addItem(Item item) {
-        String sql = "INSERT INTO items (item_name, item_type, date_found, status) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO items (item_name, item_type, date_found, location_found, status) VALUES (?, ?, ?, ?, ?)";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -13,7 +13,8 @@ public class ItemDAO {
             pstmt.setString(1, item.getItemName());
             pstmt.setString(2, item.getItemType());
             pstmt.setDate(3, item.getDateFound());
-            pstmt.setString(4, item.getStatus());
+            pstmt.setString(4, item.getLocationFound());  // NEW
+            pstmt.setString(5, item.getStatus());
 
             int rowsAffected = pstmt.executeUpdate();
             return rowsAffected > 0;
@@ -40,6 +41,7 @@ public class ItemDAO {
                 item.setItemName(rs.getString("item_name"));
                 item.setItemType(rs.getString("item_type"));
                 item.setDateFound(rs.getDate("date_found"));
+                item.setLocationFound(rs.getString("location_found"));  // NEW
                 item.setStatus(rs.getString("status"));
                 item.setCreatedAt(rs.getTimestamp("created_at"));
                 item.setUpdatedAt(rs.getTimestamp("updated_at"));
@@ -72,6 +74,7 @@ public class ItemDAO {
                 item.setItemName(rs.getString("item_name"));
                 item.setItemType(rs.getString("item_type"));
                 item.setDateFound(rs.getDate("date_found"));
+                item.setLocationFound(rs.getString("location_found"));  // NEW
                 item.setStatus(rs.getString("status"));
                 item.setCreatedAt(rs.getTimestamp("created_at"));
                 item.setUpdatedAt(rs.getTimestamp("updated_at"));
@@ -104,6 +107,7 @@ public class ItemDAO {
                 item.setItemName(rs.getString("item_name"));
                 item.setItemType(rs.getString("item_type"));
                 item.setDateFound(rs.getDate("date_found"));
+                item.setLocationFound(rs.getString("location_found"));  // NEW
                 item.setStatus(rs.getString("status"));
                 item.setCreatedAt(rs.getTimestamp("created_at"));
                 item.setUpdatedAt(rs.getTimestamp("updated_at"));
@@ -138,6 +142,7 @@ public class ItemDAO {
                 item.setItemName(rs.getString("item_name"));
                 item.setItemType(rs.getString("item_type"));
                 item.setDateFound(rs.getDate("date_found"));
+                item.setLocationFound(rs.getString("location_found"));  // NEW
                 item.setStatus(rs.getString("status"));
                 item.setCreatedAt(rs.getTimestamp("created_at"));
                 item.setUpdatedAt(rs.getTimestamp("updated_at"));
@@ -157,7 +162,7 @@ public class ItemDAO {
 
     // Update
     public boolean updateItem(Item item) {
-        String sql = "UPDATE items SET item_name = ?, item_type = ?, date_found = ?, status = ? WHERE item_id = ?";
+        String sql = "UPDATE items SET item_name = ?, item_type = ?, date_found = ?, location_found = ?, status = ? WHERE item_id = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -165,8 +170,9 @@ public class ItemDAO {
             pstmt.setString(1, item.getItemName());
             pstmt.setString(2, item.getItemType());
             pstmt.setDate(3, item.getDateFound());
-            pstmt.setString(4, item.getStatus());
-            pstmt.setInt(5, item.getItemId());
+            pstmt.setString(4, item.getLocationFound());  // NEW
+            pstmt.setString(5, item.getStatus());
+            pstmt.setInt(6, item.getItemId());
 
             int rowsAffected = pstmt.executeUpdate();
             return rowsAffected > 0;
@@ -249,7 +255,7 @@ public class ItemDAO {
             return false;
         }
 
-        String insertSql = "INSERT INTO archived_items (item_id, item_name, item_type, date_found, status, archived_reason) VALUES (?, ?, ?, ?, ?, ?)";
+        String insertSql = "INSERT INTO archived_items (item_id, item_name, item_type, date_found, location_found, status, archived_reason) VALUES (?, ?, ?, ?, ?, ?, ?)";
         String deleteSql = "DELETE FROM items WHERE item_id = ?";
 
         try (Connection conn = DatabaseConnection.getConnection()) {
@@ -262,8 +268,9 @@ public class ItemDAO {
                 insertStmt.setString(2, item.getItemName());
                 insertStmt.setString(3, item.getItemType());
                 insertStmt.setDate(4, item.getDateFound());
-                insertStmt.setString(5, item.getStatus());
-                insertStmt.setString(6, reason);
+                insertStmt.setString(5, item.getLocationFound());  // NEW
+                insertStmt.setString(6, item.getStatus());
+                insertStmt.setString(7, reason);
                 insertStmt.executeUpdate();
 
                 deleteStmt.setInt(1, itemId);
@@ -303,6 +310,7 @@ public class ItemDAO {
                 item.setItemName(rs.getString("item_name"));
                 item.setItemType(rs.getString("item_type"));
                 item.setDateFound(rs.getDate("date_found"));
+                item.setLocationFound(rs.getString("location_found"));  // NEW
                 item.setStatus(rs.getString("status"));
                 item.setArchivedDate(rs.getTimestamp("archived_date"));
                 item.setArchivedReason(rs.getString("archived_reason"));
@@ -321,7 +329,7 @@ public class ItemDAO {
     // Restore archived item back to active items
     public boolean restoreArchivedItem(int archiveId) {
         String selectSql = "SELECT * FROM archived_items WHERE archive_id = ?";
-        String insertSql = "INSERT INTO items (item_name, item_type, date_found, status) VALUES (?, ?, ?, ?)";
+        String insertSql = "INSERT INTO items (item_name, item_type, date_found, location_found, status) VALUES (?, ?, ?, ?, ?)";
         String deleteSql = "DELETE FROM archived_items WHERE archive_id = ?";
 
         try (Connection conn = DatabaseConnection.getConnection()) {
@@ -340,7 +348,8 @@ public class ItemDAO {
                     insertStmt.setString(1, rs.getString("item_name"));
                     insertStmt.setString(2, rs.getString("item_type"));
                     insertStmt.setDate(3, rs.getDate("date_found"));
-                    insertStmt.setString(4, rs.getString("status"));
+                    insertStmt.setString(4, rs.getString("location_found"));  // NEW
+                    insertStmt.setString(5, rs.getString("status"));
                     insertStmt.executeUpdate();
 
 

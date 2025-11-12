@@ -10,6 +10,7 @@ public class ArchivedItem {
     private String status;
     private Timestamp archivedDate;
     private String archivedReason;
+    private String locationFound;
 
     // Constructors
     public ArchivedItem() {
@@ -87,6 +88,14 @@ public class ArchivedItem {
 
     public void setArchivedReason(String archivedReason) {
         this.archivedReason = archivedReason;
+    }
+
+    public String getLocationFound() {
+        return locationFound;
+    }
+
+    public void setLocationFound(String locationFound) {
+        this.locationFound = locationFound;
     }
 
     @Override

@@ -7,6 +7,7 @@ public class AddItemDialog extends JDialog {
     private JTextField txtItemName;
     private JComboBox<String> cmbItemType;
     private JDateChooser dateChooser;
+    private JTextField txtLocationFound;  // NEW FIELD
     private JComboBox<String> cmbStatus;
     private boolean itemAdded = false;
     private ItemDAO itemDAO;
@@ -18,7 +19,7 @@ public class AddItemDialog extends JDialog {
     }
 
     private void initComponents() {
-        setSize(400, 350);
+        setSize(400, 400);  // Increased height to accommodate new field
         setLocationRelativeTo(getParent());
         setLayout(new BorderLayout(10, 10));
 
@@ -81,14 +82,28 @@ public class AddItemDialog extends JDialog {
         dateChooser.setFont(new Font("Arial", Font.PLAIN, 14));
         formPanel.add(dateChooser, gbc);
 
-        // Status
+        // Location Found - NEW FIELD
         gbc.gridx = 0; gbc.gridy = 3;
+        gbc.weightx = 0;
+        JLabel lblLocation = new JLabel("Location Found:");
+        lblLocation.setFont(new Font("Arial", Font.PLAIN, 14));
+        formPanel.add(lblLocation, gbc);
+
+        gbc.gridx = 1; gbc.gridy = 3;
+        gbc.weightx = 1.0;
+        txtLocationFound = new JTextField(20);
+        txtLocationFound.setFont(new Font("Arial", Font.PLAIN, 14));
+        txtLocationFound.setToolTipText("e.g., Library - 2nd Floor, Cafeteria, Room 301");
+        formPanel.add(txtLocationFound, gbc);
+
+        // Status
+        gbc.gridx = 0; gbc.gridy = 4;
         gbc.weightx = 0;
         JLabel lblStatus = new JLabel("Status:");
         lblStatus.setFont(new Font("Arial", Font.PLAIN, 14));
         formPanel.add(lblStatus, gbc);
 
-        gbc.gridx = 1; gbc.gridy = 3;
+        gbc.gridx = 1; gbc.gridy = 4;
         gbc.weightx = 1.0;
         String[] statuses = {"Found", "Lost"};
         cmbStatus = new JComboBox<>(statuses);
@@ -131,9 +146,10 @@ public class AddItemDialog extends JDialog {
             String itemType = (String) cmbItemType.getSelectedItem();
             java.util.Date utilDate = dateChooser.getDate();
             Date dateFound = new Date(utilDate.getTime());
+            String locationFound = txtLocationFound.getText().trim();  // NEW - get location
             String status = (String) cmbStatus.getSelectedItem();
 
-            Item item = new Item(itemName, itemType, dateFound, status);
+            Item item = new Item(itemName, itemType, dateFound, locationFound, status);  // UPDATED constructor
 
             if (itemDAO.addItem(item)) {
                 JOptionPane.showMessageDialog(this,
@@ -168,6 +184,8 @@ public class AddItemDialog extends JDialog {
                     JOptionPane.ERROR_MESSAGE);
             return false;
         }
+
+        // Location is optional, so no validation needed for it
 
         return true;
     }

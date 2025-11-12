@@ -10,12 +10,13 @@ public class LostAndFoundGUI extends JFrame {
     private final ItemDAO itemDAO;
     private JTable itemTable;
     private DefaultTableModel tableModel;
-    private User currentUser; // Store logged-in user
+    private User currentUser;
 
     // Form components
     private JTextField txtItemName;
     private JComboBox<String> cmbItemType;
     private JDateChooser dateChooser;
+    private JTextField txtLocationFound;  // NEW FIELD
     private JComboBox<String> cmbStatus;
     private JTextField txtSearch;
 
@@ -25,7 +26,6 @@ public class LostAndFoundGUI extends JFrame {
 
     private int selectedItemId = -1;
 
-    // Constructor that accepts logged-in user
     public LostAndFoundGUI(User user) {
         this.currentUser = user;
         itemDAO = new ItemDAO();
@@ -35,7 +35,7 @@ public class LostAndFoundGUI extends JFrame {
 
     private void initComponents() {
         setTitle("Lost and Found Item Management System");
-        setSize(1100, 700);
+        setSize(1200, 700);  // Increased width slightly
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout(10, 10));
@@ -105,8 +105,8 @@ public class LostAndFoundGUI extends JFrame {
 
         centerPanel.add(topSearchPanel, BorderLayout.NORTH);
 
-        // Table
-        String[] columns = {"Item ID", "Item Name", "Item Type", "Date Found", "Status"};
+        // Table - UPDATED with Location Found column
+        String[] columns = {"Item ID", "Item Name", "Item Type", "Date Found", "Location Found", "Status"};
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -180,14 +180,27 @@ public class LostAndFoundGUI extends JFrame {
         dateChooser.setDate(new java.util.Date());
         formPanel.add(dateChooser, gbc);
 
-        // Status
+        // Location Found - NEW FIELD
         gbc.gridx = 0;
         gbc.gridy = 3;
+        gbc.weightx = 0;
+        formPanel.add(new JLabel("Location Found:"), gbc);
+
+        gbc.gridx = 1;
+        gbc.gridy = 3;
+        gbc.weightx = 1.0;
+        txtLocationFound = new JTextField(20);
+        txtLocationFound.setToolTipText("e.g., Library - 2nd Floor, Cafeteria, Room 301");
+        formPanel.add(txtLocationFound, gbc);
+
+        // Status
+        gbc.gridx = 0;
+        gbc.gridy = 4;
         gbc.weightx = 0;
         formPanel.add(new JLabel("Status:"), gbc);
 
         gbc.gridx = 1;
-        gbc.gridy = 3;
+        gbc.gridy = 4;
         gbc.weightx = 1.0;
         String[] statuses = {"Found", "Lost"};
         cmbStatus = new JComboBox<>(statuses);
@@ -299,6 +312,7 @@ public class LostAndFoundGUI extends JFrame {
                     item.getItemName(),
                     item.getItemType(),
                     item.getDateFound(),
+                    item.getLocationFound(),  // NEW
                     item.getStatus()
             };
             tableModel.addRow(row);
@@ -311,11 +325,13 @@ public class LostAndFoundGUI extends JFrame {
         String itemName = (String) tableModel.getValueAt(row, 1);
         String itemType = (String) tableModel.getValueAt(row, 2);
         Date dateFound = (Date) tableModel.getValueAt(row, 3);
-        String status = (String) tableModel.getValueAt(row, 4);
+        String locationFound = (String) tableModel.getValueAt(row, 4);  // NEW
+        String status = (String) tableModel.getValueAt(row, 5);  // Index changed from 4 to 5
 
         txtItemName.setText(itemName);
         cmbItemType.setSelectedItem(itemType);
         dateChooser.setDate(new java.util.Date(dateFound.getTime()));
+        txtLocationFound.setText(locationFound != null ? locationFound : "");  // NEW
         cmbStatus.setSelectedItem(status);
 
         btnUpdate.setEnabled(true);
@@ -329,9 +345,10 @@ public class LostAndFoundGUI extends JFrame {
             String itemType = (String) cmbItemType.getSelectedItem();
             java.util.Date utilDate = dateChooser.getDate();
             Date dateFound = new Date(utilDate.getTime());
+            String locationFound = txtLocationFound.getText().trim();  // NEW
             String status = (String) cmbStatus.getSelectedItem();
 
-            Item item = new Item(selectedItemId, itemName, itemType, dateFound, status);
+            Item item = new Item(selectedItemId, itemName, itemType, dateFound, locationFound, status);  // UPDATED
 
             if (itemDAO.updateItem(item)) {
                 JOptionPane.showMessageDialog(this, "Item updated successfully!",
@@ -414,6 +431,7 @@ public class LostAndFoundGUI extends JFrame {
                             item.getItemName(),
                             item.getItemType(),
                             item.getDateFound(),
+                            item.getLocationFound(),  // NEW
                             item.getStatus()
                     };
                     tableModel.addRow(row);
@@ -441,6 +459,7 @@ public class LostAndFoundGUI extends JFrame {
                         item.getItemName(),
                         item.getItemType(),
                         item.getDateFound(),
+                        item.getLocationFound(),  // NEW
                         item.getStatus()
                 };
                 tableModel.addRow(row);
@@ -453,6 +472,7 @@ public class LostAndFoundGUI extends JFrame {
         txtItemName.setText("");
         cmbItemType.setSelectedIndex(0);
         dateChooser.setDate(new java.util.Date());
+        txtLocationFound.setText("");  // NEW
         cmbStatus.setSelectedIndex(0);
         selectedItemId = -1;
 
@@ -490,7 +510,6 @@ public class LostAndFoundGUI extends JFrame {
             e.printStackTrace();
         }
 
-        // Start with login screen instead of main GUI
         SwingUtilities.invokeLater(() -> {
             LoginScreen loginScreen = new LoginScreen();
             loginScreen.setVisible(true);
